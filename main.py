@@ -4,7 +4,7 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 
-def search_parte(de_pesquisa):
+def consulta_por_parte(nome_da_parte):
     """Obtém a resposta da pesquisa por parte"""
 
     # URL base da pesquisa
@@ -15,7 +15,7 @@ def search_parte(de_pesquisa):
         "conversationId": "",
         "paginaConsulta": "0",
         "cbPesquisa": "NMPARTE",
-        "dePesquisa": de_pesquisa,
+        "dePesquisa": nome_da_parte,
         "localPesquisa.cdLocal": "4", # Somente Direito Criminal
     }
 
@@ -24,10 +24,23 @@ def search_parte(de_pesquisa):
 
     return response
 
-    # Cria o objeto BeautifulSoup a partir do conteúdo HTML da resposta
-    soup = BeautifulSoup(response.content, 'html.parser')
+def consulta_num_oab(numero_oab):
+    # URL base da pesquisa
+    base_url = "https://esaj.tjsp.jus.br/cposg/search.do"
 
-    return soup
+    # Payload da requisição
+    payload = {
+        "conversationId": "",
+        "paginaConsulta": "0",
+        "cbPesquisa": "NUMOAB",
+        "dePesquisa": numero_oab,
+        "localPesquisa.cdLocal": "4",# Somente Direito Criminal
+    }
+
+    # Realiza a requisição e armazena o resultado na variável 'response'
+    response = requests.post(base_url, data=payload)
+
+    return response
 
 # Verifica a existência dos arquivos "investigados.txt" e "oab.txt".
 # Caso não existam, sai do programa
@@ -36,34 +49,58 @@ condicao = os.path.exists('config_pesquisa/investigados.txt') and os.path.exists
 if(not(condicao)):
   sys.exit()
 
+# inicializa as listas vazias
+investigados = []
+oab = []
+
 # Lê o arquivo de investigados e cria a lista de investigados
 with open('config_pesquisa/investigados.txt', 'r') as f:
-    # inicializa a lista vazia
-    investigados = []
-    
-    # percorre cada linha do arquivo
     for investigado in f:
-        # adiciona a linha na lista
         investigados.append(investigado.strip())
 
 # Lê o arquivo de OAB e cria a lista de pesquisa por OAB
 with open('config_pesquisa/oab.txt', 'r') as f:
-    # inicializa a lista vazia
-    oab = []
-    
-    # percorre cada linha do arquivo
     for registro in f:
-        # adiciona a linha na lista
         oab.append(registro.strip())
 
+print(investigados)
+print(oab)
+
 # Cria o arquivo txt para gravar a pesquisa (com a data/hora)
-now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%m')
-arquivo_resultado = 'resultado-' + now +'.txt'
-with open(arquivo_resultado, 'w'):
-    pass
+now = datetime.datetime.now()
+now_formatado = now.strftime('%Y-%m-%d-%H-%m')
+now_legivel = now.strftime('%d/%m/%Y - %Hh%mmin')
+arquivo_resultado = 'resultado-' + now_formatado +'.txt'
+with open(arquivo_resultado, 'w') as f:
+    f.write(f'RESULTADO DA VARREDURA REALIZADA EM {now_legivel}')
+    f.write('\n' + '-'* 58 + '\n\n')
 
 # Percorre a lista de investigados e faz a consulta por partes
+for investigado in investigados:
+    response = consulta_por_parte(investigado)
+    if (response.status_code == 200):
+        soup = BeautifulSoup(response.content, 'html.parser')
+        if (soup.find('div', {'id':'spwTabelaMensagem'})):
+            print('Encontrei uma mensagem')
+        else:
+            if (soup.find('div', {'id': 'listagemDeProcessos'})):
+                print('Encontrei a listagem de processos')
+
+        
+    else:
+        with open(arquivo_resultado, 'a') as f:
+            f.write(f'{investigado}: ')
+            f.write('sem resposta do servidor. Verifique!')
+            f.write('\n' + '-'* 58 + '\n')
+
+
+
+
+
 # Verifica o "response" e grava o alerta em arquivo texto para != 200
+
+# Cria o objeto BeautifulSoup a partir do conteúdo HTML da resposta
+# soup = BeautifulSoup(response.content, 'html.parser')
 
 
 
@@ -73,7 +110,7 @@ with open(arquivo_resultado, 'w'):
 # Grava o resultado da pesquisa (verificar opções / testar tb com nomes)
 # Transformar em executável para a distribuição (não usar a opção de arquivo único)
 
-
+""" 
 
 with open('resultado.txt', 'w') as arquivo:
     for linha in linhas:
@@ -107,4 +144,4 @@ with open('resultado.txt', 'w') as arquivo:
                         print(f'Verifique manualmente o nome informado\n', file=arquivo)
         print('*'*30, file=arquivo)
 
-print('Programa concluído!')
+print('Programa concluído!') """
