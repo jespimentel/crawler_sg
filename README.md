@@ -5,7 +5,7 @@
 
 ### Introdução
 
-O GAECO monitora a entrada de processos em 2º grau relacionados a seus investigados, realizando consultas periódicas ao eSAJ manualmente. Para automatizar essa tarefa, criamos o presente web crawler para a pesquisa não autenticada ao 2º Grau do Tribunal de Justiça do Estado de São Paulo. 
+A Promotoria monitora a entrada de processos em 2º grau relacionados a seus investigados, realizando consultas periódicas ao eSAJ manualmente. Para automatizar essa tarefa, criamos o presente web crawler para a pesquisa não autenticada ao 2º Grau do Tribunal de Justiça do Estado de São Paulo. 
 
 A aplicação faz buscas por nome da parte ou número de OAB e retorna informações sobre processos criminais encontrados. 
 
