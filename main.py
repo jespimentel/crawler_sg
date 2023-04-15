@@ -24,6 +24,7 @@ def consulta_por_parte(nome_da_parte):
 
     return response
 
+
 def consulta_num_oab(numero_oab):
     # URL base da pesquisa
     base_url = "https://esaj.tjsp.jus.br/cposg/search.do"
@@ -42,24 +43,52 @@ def consulta_num_oab(numero_oab):
 
     return response
 
+
 def faz_busca(soup):
+    """Analisa e retorna a resposta da consulta"""
+    # Não existem processos ou muitos processos
     mensagem = soup.find('div', {'id': 'spwTabelaMensagem'})
     if mensagem is not None:
         texto = mensagem.find('td', {'id':'mensagemRetorno'})
-        texto = texto.find('li').get_text()
+        texto = texto.find('li').text
         return texto
     
-    relacao_processos = soup.find('div', {'id': 'listagemDeProcessos'})
+    # Encontro de uma lista de processos
+    relacao_processos = soup.find('ul', {'class': 'unj-list-row'})
     if relacao_processos is not None:
-        return('Encontrei uma lista de processos')
+        n_processo = relacao_processos.find_all('a', {'class':'linkProcesso'})
+        classe = relacao_processos.find_all('div', {'class':'classeProcesso'})
+        assunto = relacao_processos.find_all('div', {'class':'assuntoProcesso'})
+        data_local= relacao_processos.find_all('div', {'class':'dataLocalDistribuicao'})
+
+        listas = [n_processo, classe, assunto, data_local]
+        texto = ''
+        for i in range(len(listas[0])):
+            for lista in listas:
+                texto = texto + (lista[i].text.strip()) + '\n'
+            texto = texto + '\n\n'    
+        return texto
          
-    processo_unico = soup.find('div', {'class': 'container'})
+    # Encontro de um único processo
+    processo_unico = soup.find('div', {'class': 'unj-entity-header__summary__barra'})
     if processo_unico is not None:
-         return('Encontrei uma lista de processos')
+         n_processo = processo_unico.find('span', {'id':'numeroProcesso'})
+         if n_processo:
+             n_processo = n_processo.text.strip()
+         classe = processo_unico.find('div', {'id':'classeProcesso'})
+         if classe:
+             classe = classe.text.strip()
+         assunto = processo_unico.find('div', {'id':'assuntoProcesso'})
+         if assunto:
+             assunto = assunto.text.strip()
+         orgao = processo_unico.find('div', {'id': 'orgaoJulgadorProcesso'})
+         if orgao:
+             orgao = orgao.text.strip()
+            
+         return(f'\n{n_processo}\n{classe}\n{assunto}\n{orgao}\n')
 
-
-# Verifica a existência dos arquivos "investigados.txt" e "oab.txt".
-# Caso não existam, sai do programa
+# Início
+# Verifica a existência dos arquivos "investigados.txt" e "oab.txt" na pasta "config_pesquisa".
 condicao = os.path.exists('config_pesquisa/investigados.txt') and os.path.exists('config_pesquisa/oab.txt')
 if(not(condicao)):
   sys.exit()
@@ -78,7 +107,7 @@ with open('config_pesquisa/oab.txt', 'r') as f:
     for registro in f:
         oab.append(registro.strip())
 
-# Cria o arquivo txt para gravar a pesquisa (com a data/hora)
+# Cria o arquivo txt para gravar a pesquisa
 now = datetime.datetime.now()
 now_formatado = now.strftime('%Y-%m-%d-%H-%M')
 now_legivel = now.strftime('%d/%m/%Y - %Hh%Mmin.')
@@ -95,7 +124,7 @@ with open(arquivo_resultado, 'w', encoding='utf-8') as f:
        
         if (response.status_code == 200):
             soup = BeautifulSoup(response.content, 'html.parser')
-            f.write(f'{investigado}:\n{faz_busca(soup)}')
+            f.write(f'{investigado}:\n\n{faz_busca(soup)}')
             f.write('\n' + '-'* 58 + '\n')
             
         else:
@@ -120,23 +149,7 @@ with open(arquivo_resultado, 'w', encoding='utf-8') as f:
 
 print('Programa concluído!')
 
-# Tarefas
+# Tarefas:
+
 # Readme
 # Transformar em executável para a distribuição (não usar a opção de arquivo único)
-
-""" 
-# Encontro de vários processos na primeira página
-listagem_de_processos = conteudo.find('div', {'id': 'listagemDeProcessos'})
-
-# Encontra todas as tags filhas da tag `listagem_de_processos`
-n_processo = listagem_de_processos.find('a', {'class':'linkProcesso'})
-classe = listagem_de_processos.find('div', {'class':'classeProcesso'})
-assunto = listagem_de_processos.find('div', {'class':'assuntoProcesso'})
-data_local= listagem_de_processos.find('div', {'class':'dataLocalDistribuicao'})
-
-print(n_processo.get_text().strip(), file=arquivo)
-print(classe.get_text().strip(), file=arquivo)
-print(assunto.get_text().strip(), file=arquivo)
-print(data_local.get_text().strip(), file=arquivo)
-            
-"""
