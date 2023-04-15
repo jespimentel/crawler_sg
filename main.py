@@ -1,5 +1,5 @@
 import sys
-import os.path
+import os
 import datetime
 import requests
 from bs4 import BeautifulSoup
@@ -88,10 +88,20 @@ def faz_busca(soup):
          return(f'\n{n_processo}\n{classe}\n{assunto}\n{orgao}\n')
 
 # Início
+print('Bem vindo ao crawler do Pimentel v. 1.0')
 # Verifica a existência dos arquivos "investigados.txt" e "oab.txt" na pasta "config_pesquisa".
 condicao = os.path.exists('config_pesquisa/investigados.txt') and os.path.exists('config_pesquisa/oab.txt')
 if(not(condicao)):
+  print("Não encontrei os arquivos de configuração. Pressione Enter para sair...")
+  input()
   sys.exit()
+
+# Cria a pasta de resultados
+pasta = '../_resultados'
+print (f'Após a execução, procure o arquivo gerado na pasta {pasta}')
+
+if not os.path.exists(pasta):
+    os.makedirs(pasta)
 
 # inicializa as listas vazias
 investigados = []
@@ -111,7 +121,7 @@ with open('config_pesquisa/oab.txt', 'r') as f:
 now = datetime.datetime.now()
 now_formatado = now.strftime('%Y-%m-%d-%H-%M')
 now_legivel = now.strftime('%d/%m/%Y - %Hh%Mmin.')
-arquivo_resultado = f'resultado-{now_formatado}.txt'
+arquivo_resultado = f'{pasta}/resultado-{now_formatado}.txt'
 
 # Abre o arquivo para gravar o resultado da consulta
 with open(arquivo_resultado, 'w', encoding='utf-8') as f:
@@ -148,3 +158,5 @@ with open(arquivo_resultado, 'w', encoding='utf-8') as f:
            f.write('\n' + '-'* 58 + '\n')
 
 print('Programa concluído!')
+print("Pressione Enter para sair...")
+input()
