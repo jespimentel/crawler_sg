@@ -22,5 +22,6 @@ Após a criação dos arquivos, basta executar o programa e esperar o resultado 
 
 ### Conclusões
 O programa é uma ferramenta útil para a coleta automatizada das informações sobre processos judiciais, limitada a consulta ao 2º Grau do Tribunal de Justiça do Estado de São Paulo, através do portal eSAJ e para um usuário não autenticado. 
+
 ---
 Para saber mais: <https://www.digitalocean.com/community/tutorials/como-fazer-scraping-em-paginas-web-com-beautiful-soup-and-python-3-pt>. Acesso em: 15 abr. 2023.
