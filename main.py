@@ -2,6 +2,7 @@ import sys
 import os
 import datetime
 import hashlib
+import hashlib
 import requests
 from bs4 import BeautifulSoup
 
@@ -124,6 +125,23 @@ if arquivos:
         conteudo_do_arquivo = arquivo.read()
         sha1_arquivo_recente = hashlib.sha1(conteudo_do_arquivo).hexdigest()
 
+# Verifica se a pasta de resultados já contém arquivos e extai o hash (SHA-1) do mais recente
+
+# Lista de arquivos no diretório se existentes
+arquivos = os.listdir(pasta)
+if arquivos:
+    
+    # Ordena os arquivos por data de modificação
+    arquivos = sorted(arquivos, key=lambda x: os.path.getmtime(os.path.join(pasta, x)))
+
+    # Seleciona o arquivo mais recente
+    arquivo_recente = os.path.join(pasta, arquivos[-1])
+    
+    # Calcula o hash SHA-1 do arquivo selecionado
+    with open(arquivo_recente, 'rb') as arquivo:
+        conteudo_do_arquivo = arquivo.read()
+        sha1_arquivo_recente = hashlib.sha1(conteudo_do_arquivo).hexdigest()
+
 # inicializa as listas vazias
 investigados = []
 oab = []
@@ -176,6 +194,24 @@ with open(arquivo_resultado, 'w', encoding='utf-8') as f:
            f.write(f'{registro}:\n')
            f.write('Sem resposta do servidor. Verifique!')
            f.write('\n' + '-'* 58 + '\n')
+
+# Calcula o hash SHA-1 do arquivo recém-criado
+with open(arquivo_resultado, 'rb') as arquivo:
+    conteudo_do_arquivo = arquivo.read()
+    sha1_arquivo_resultado = hashlib.sha1(conteudo_do_arquivo).hexdigest()
+
+
+# Compara o conteúdo dos arquivos recente (se existente) e resultado pelo hash
+if arquivos:
+    print('-'* 58)
+    print("Últimos arquivos gerados | hash (sha-1)")
+    print(arquivo_recente, sha1_arquivo_recente)
+    print(arquivo_resultado, sha1_arquivo_resultado)
+    print('-'* 58)
+    if (sha1_arquivo_recente == sha1_arquivo_resultado):
+        print('\nSem alteração das informações anteriores.\n')
+    else:
+        print('\nATENÇÃO: novas informações incluídas!\n')
 
 # Calcula o hash SHA-1 do arquivo recém-criado
 with open(arquivo_resultado, 'rb') as arquivo:
