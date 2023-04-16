@@ -1,6 +1,7 @@
 import sys
 import os
 import datetime
+import hashlib
 import requests
 from bs4 import BeautifulSoup
 
@@ -89,8 +90,11 @@ def faz_busca(soup):
 
 # Início
 print('Bem vindo ao crawler do Pimentel v. 1.0')
+
 # Verifica a existência dos arquivos "investigados.txt" e "oab.txt" na pasta "config_pesquisa".
-condicao = os.path.exists('config_pesquisa/investigados.txt') and os.path.exists('config_pesquisa/oab.txt')
+relacao_investigados = '../config_pesquisa/investigados.txt'
+relacao_oab = '../config_pesquisa/oab.txt'
+condicao = os.path.exists(relacao_investigados) and os.path.exists(relacao_oab)
 if(not(condicao)):
   print("Não encontrei os arquivos de configuração. Pressione Enter para sair...")
   input()
@@ -103,17 +107,34 @@ print (f'Após a execução, procure o arquivo gerado na pasta {pasta}')
 if not os.path.exists(pasta):
     os.makedirs(pasta)
 
+# Verifica se a pasta de resultados já contém arquivos e extai o hash (SHA-1) do mais recente
+
+# Lista de arquivos no diretório se existentes
+arquivos = os.listdir(pasta)
+if arquivos:
+    
+    # Ordena os arquivos por data de modificação
+    arquivos = sorted(arquivos, key=lambda x: os.path.getmtime(os.path.join(pasta, x)))
+
+    # Seleciona o arquivo mais recente
+    arquivo_recente = os.path.join(pasta, arquivos[-1])
+    
+    # Calcula o hash SHA-1 do arquivo selecionado
+    with open(arquivo_recente, 'rb') as arquivo:
+        conteudo_do_arquivo = arquivo.read()
+        sha1_arquivo_recente = hashlib.sha1(conteudo_do_arquivo).hexdigest()
+
 # inicializa as listas vazias
 investigados = []
 oab = []
 
 # Lê o arquivo de investigados e cria a lista de investigados
-with open('config_pesquisa/investigados.txt', 'r') as f:
+with open(relacao_investigados, 'r') as f:
     for investigado in f:
         investigados.append(investigado.strip())
 
 # Lê o arquivo de OAB e cria a lista de pesquisa por OAB
-with open('config_pesquisa/oab.txt', 'r') as f:
+with open(relacao_oab, 'r') as f:
     for registro in f:
         oab.append(registro.strip())
 
@@ -125,7 +146,6 @@ arquivo_resultado = f'{pasta}/resultado-{now_formatado}.txt'
 
 # Abre o arquivo para gravar o resultado da consulta
 with open(arquivo_resultado, 'w', encoding='utf-8') as f:
-    f.write(f'RESULTADO DA VARREDURA REALIZADA EM {now_legivel}\n')
     f.write('\n\nPESQUISA POR INVESTIGADOS\n\n')
 
     # Percorre a lista de investigados e faz a consulta
@@ -156,6 +176,24 @@ with open(arquivo_resultado, 'w', encoding='utf-8') as f:
            f.write(f'{registro}:\n')
            f.write('Sem resposta do servidor. Verifique!')
            f.write('\n' + '-'* 58 + '\n')
+
+# Calcula o hash SHA-1 do arquivo recém-criado
+with open(arquivo_resultado, 'rb') as arquivo:
+    conteudo_do_arquivo = arquivo.read()
+    sha1_arquivo_resultado = hashlib.sha1(conteudo_do_arquivo).hexdigest()
+
+
+# Compara o conteúdo dos arquivos recente (se existente) e resultado pelo hash
+if arquivos:
+    print('-'* 58)
+    print("Últimos arquivos gerados | hash (sha-1)")
+    print(arquivo_recente, sha1_arquivo_recente)
+    print(arquivo_resultado, sha1_arquivo_resultado)
+    print('-'* 58)
+    if (sha1_arquivo_recente == sha1_arquivo_resultado):
+        print('\nSem alteração das informações anteriores.\n')
+    else:
+        print('\nATENÇÃO: novas informações incluídas!\n')
 
 print('Programa concluído!')
 print("Pressione Enter para sair...")
