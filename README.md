@@ -13,7 +13,7 @@ A linguagem de programação escolhida foi o Python, utilizando-se as biblioteca
 
 ### Estratégias usadas no programa
 
-O programa realiza a busca em uma URL específica e utiliza o método POST para enviar os dados necessários. Ele analisa a resposta utilizando a biblioteca BeautifulSoup e, a partir disso, retorna os resultados em um formato legível. O programa também utiliza arquivos de configuração para armazenar as informações de investigados e números de OAB, além de criar uma pasta para armazenar os resultados.
+O programa realiza a busca em uma URL específica e utiliza o método POST para enviar os dados necessários. Ele analisa a resposta utilizando a biblioteca BeautifulSoup e, a partir disso, retorna os resultados em um formato legível. Os arquivos de configuração armazenam as informações de investigados e números de OAB. O arquivo de resultados gravado é comparado com o atual, por meio de hash, para verificar se houve alteração nas informações anteriormente obtidas.
 
 ### Como usar o programa
 Para utilizar o programa, é necessário criar dois arquivos de texto dentro da pasta "config_pesquisa": "investigados.txt" e "oab.txt". No arquivo "investigados.txt", deve-se incluir o nome das partes que se deseja buscar informações, uma em cada linha. Já no arquivo "oab.txt", deve-se incluir o número de OAB, um em cada linha. Assentos e pontos devem ser desprezados.
