@@ -15,7 +15,7 @@ O programa realiza a busca em uma URL específica e utiliza o método POST para 
 
 ### Como obter o programa
 
-O código fonte do programa está publicado no GitHub, com licença MIT (cf. em <https://github.com/jespimentel/crawler_sg>). Os iniciados em Python não terão qualquer dificuldade para clonar o programa e rodar na própria máquina. As bibliotecas necessárias estão relacionadas no arquivo "requirements.txt". Para os colegas de MP, podemos fornecer o executável, mediante solicitação.
+O código fonte do programa está publicado no GitHub, com licença MIT (cf. em <https://github.com/jespimentel/crawler_sg>). Os iniciados em Python não terão qualquer dificuldade para clonar o programa e rodar na própria máquina. As bibliotecas necessárias estão relacionadas no arquivo "requirements.txt". Para os colegas de MP, podemos fornecer o executável, mediante solicitação (o Windows Defender pode reclamar disso...).
 
 ### Como usar o programa
 
